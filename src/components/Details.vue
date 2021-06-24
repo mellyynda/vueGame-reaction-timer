@@ -16,7 +16,7 @@ export default {
   name: 'Details',
   data() {
     return {
-      instructions: "Try to click on the appearing elements as fast as possible but watch out for bombs. The faster you are, the higher score you get.",
+      instructions: "Try to click on the appearing element as fast as possible but watch out for bombs. If you see a bomb, click around it as fast as possible and wait for the next element to appear.",
       buttonText: 'start',
       elementNo: 1,
       gameOngoing: false,
@@ -62,36 +62,40 @@ export default {
         const userTime = this.endTime - this.delay - this.startTime;
         if ((this.endTime - this.startTime) > this.delay) {
           if(e.target.tagName === 'IMG') {
-
-            switch(true) {
-              case (userTime < 301):
-                this.instructions = `🏆 Congratulations! You were super fast 🌠. You managed to hit the target within ${userTime} miliseconds`;
-                break;
-              case (userTime < 601):
-                this.instructions = `🏆 Great job! You were very fast 🏂. You managed to hit the target within ${userTime} miliseconds`;
-                break;
-              case (userTime < 801):
-                this.instructions = `Good job! You were not in a hurry 🚶 but still hit the target within ${userTime} miliseconds`;
-                break;
-              case (userTime < 1001):
-                this.instructions = `You can do better! Try to 🏃💨 and hit the target faster than ${userTime} miliseconds`;
-                break;
-              case (userTime >= 1001):
-                this.instructions = `Oh no! The 🐌 was faster. You only got ${userTime} miliseconds`;
-                break;
-            }            
-            this.buttonText = '⟲ try again';
-            
+            if(this.elementNo === 3 || this.elementNo === 4) {
+               this.instructions = `💥💔 You lost! You just clicked on a 💣 within ${userTime} miliseconds`;
+            } else {
+              switch(true) {
+                case (userTime < 301):
+                  this.instructions = `🏆 Congratulations! You were super fast 🌠. You managed to hit the target within ${userTime} miliseconds`;
+                  break;
+                case (userTime < 601):
+                  this.instructions = `🏆 Great job! You were very fast 🏂. You managed to hit the target within ${userTime} miliseconds`;
+                  break;
+                case (userTime < 801):
+                  this.instructions = `Good job! You were not in a hurry 🚶 but still hit the target within ${userTime} miliseconds`;
+                  break;
+                case (userTime < 1001):
+                  this.instructions = `You can do better! Try to 🏃💨 and hit the target faster than ${userTime} miliseconds`;
+                  break;
+                case (userTime >= 1001):
+                  this.instructions = `Oh no! The 🐌 was faster. You only got ${userTime} miliseconds`;
+                  break;
+              } 
+            }                       
           } else {
-            this.instructions = `You missed! This time you missed but maybe next time you will get it!`;
-            this.buttonText = '⟲ try again';
+            if(this.elementNo === 3 || this.elementNo === 4) {
+              this.startGame();
+            } else {
+              this.instructions = `You missed! This time you missed but maybe next time you will get it!`;
+            }
           };
           
         } else {
-          this.instructions = 'Too soon! You clicked before the element appeared.';
-          this.buttonText = '⟲ try again';
+          this.instructions = 'Too soon! You clicked before the element appeared.';          
           clearTimeout(this.timer);
         }
+        this.buttonText = '⟲ try again';
       }
     }
   }
