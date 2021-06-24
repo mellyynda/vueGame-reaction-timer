@@ -4,7 +4,7 @@
       <p v-if="!gameOngoing">{{ instructions }}</p>  
     </div>
     <button v-if="!gameOngoing" @click="startGame">{{ buttonText}}</button>
-    <div ref="area" :class="{ area: true, inactive: gameOngoing === false }" @click="endGame">
+    <div ref="area" :class="{ area: true, inactive: gameOngoing === false }" @mousedown="endGame">
       <img ref="elem" src="../assets/elements/apple.png" alt="element">
     </div>
     
@@ -53,16 +53,31 @@ export default {
       if (this.gameOngoing) {
         this.endTime = Date.now();
         this.gameOngoing = false;
-         this.$refs.elem.style.opacity = '0.4';
-        console.log(e.target, this.endTime);
+        this.$refs.elem.style.opacity = '0.4';
+        const userTime = this.endTime - this.delay - this.startTime;
         if ((this.endTime - this.startTime) > this.delay) {
-          console.log('clicked after element appeared', this.endTime - this.delay - this.startTime);
           if(e.target.tagName === 'IMG') {
-            console.log("you won");
-            this.instructions = `Great job! You managed to hit the target within ${this.endTime - this.delay - this.startTime} miliseconds`;
+
+            switch(true) {
+              case (userTime < 301):
+                this.instructions = `🏆 Congratulations! You were super fast 🌠. You managed to hit the target within ${userTime} miliseconds`;
+                break;
+              case (userTime < 601):
+                this.instructions = `🏆 Great job! You were very fast 🏂. You managed to hit the target within ${userTime} miliseconds`;
+                break;
+              case (userTime < 801):
+                this.instructions = `Good job! You were not in a hurry 🚶 but still hit the target within ${userTime} miliseconds`;
+                break;
+              case (userTime < 1001):
+                this.instructions = `You can do better! Try to 🏃💨 and hit the target faster than ${userTime} miliseconds`;
+                break;
+              case (userTime >= 1001):
+                this.instructions = `Oh no! The 🐌 was faster. You only got ${userTime} miliseconds`;
+                break;
+            }            
             this.buttonText = '⟲ try again';
             
-          } else{
+          } else {
             this.instructions = `You missed! This time you missed but maybe next time you will get it!`;
             this.buttonText = '⟲ try again';
           };
@@ -103,7 +118,7 @@ button:hover, button:active, button:focus{
 }
 .area{
   width: 100%;
-  min-height: 300px;
+  min-height: 600px;
   background:#dfdfdf;
   padding:15px  8px;
   position: relative;
