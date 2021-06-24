@@ -1,7 +1,14 @@
 <template>
   <div class="hello"> 
     <div class="feedback" ref="response">
-      <p v-if="!gameOngoing">{{ instructions }}</p>  
+      <p v-if="!gameOngoing">
+        <span>{{ feedback }}</span>
+        <span v-if="showInstructions">{{ instructions }}</span>
+        <span v-if="!showInstructions" class="info"> ℹ️ 
+          <span class="instructions">Try to click on the appearing element as fast as possible but watch out for bombs. If you see a bomb, click around it as fast as possible and wait for the next element to appear.</span>
+        </span> 
+        
+      </p>  
     </div>
     <button v-if="!gameOngoing" @click="startGame">{{ buttonText}}</button>
     <div ref="area" :class="{ area: true, inactive: gameOngoing === false }" @mousedown="endGame">
@@ -17,6 +24,8 @@ export default {
   data() {
     return {
       instructions: "Try to click on the appearing element as fast as possible but watch out for bombs. If you see a bomb, click around it as fast as possible and wait for the next element to appear.",
+      showInstructions: true,
+      feedback: "",
       buttonText: 'start',
       elementNo: 1,
       gameOngoing: false,
@@ -32,6 +41,7 @@ export default {
     },
     startGame() {
       this.elementNo = this.getRandomArbitrary(1,8);
+      this.showInstructions = false;
       this.$refs.area.scrollIntoView({behavior: "smooth", block: "center"});
       this.gameOngoing = true;  
       this.startTime = Date.now();
@@ -63,23 +73,23 @@ export default {
         if ((this.endTime - this.startTime) > this.delay) {
           if(e.target.tagName === 'IMG') {
             if(this.elementNo === 3 || this.elementNo === 4) {
-               this.instructions = `💥💔 You lost! You just clicked on a 💣 within ${userTime} miliseconds`;
+               this.feedback = `💥💔 You lost! You just clicked on a 💣 within ${userTime} miliseconds`;
             } else {
               switch(true) {
                 case (userTime < 301):
-                  this.instructions = `🏆 Congratulations! You were super fast 🌠. You managed to hit the target within ${userTime} miliseconds`;
+                  this.feedback = `🏆 Congratulations! You were super fast 🌠. You managed to hit the target within ${userTime} miliseconds`;
                   break;
                 case (userTime < 601):
-                  this.instructions = `🏆 Great job! You were very fast 🏂. You managed to hit the target within ${userTime} miliseconds`;
+                  this.feedback = `🏆 Great job! You were very fast 🏂. You managed to hit the target within ${userTime} miliseconds`;
                   break;
                 case (userTime < 801):
-                  this.instructions = `Good job! You were not in a hurry 🚶 but still hit the target within ${userTime} miliseconds`;
+                  this.feedback = `Good job! You were not in a hurry 🚶 but still hit the target within ${userTime} miliseconds`;
                   break;
                 case (userTime < 1001):
-                  this.instructions = `You can do better! Try to 🏃💨 and hit the target faster than ${userTime} miliseconds`;
+                  this.feedback = `You can do better! Try to 🏃💨 and hit the target faster than ${userTime} miliseconds`;
                   break;
                 case (userTime >= 1001):
-                  this.instructions = `Oh no! The 🐌 was faster. You only got ${userTime} miliseconds`;
+                  this.feedback = `Oh no! The 🐌 was faster. You only got ${userTime} miliseconds`;
                   break;
               } 
             }                       
@@ -87,12 +97,12 @@ export default {
             if(this.elementNo === 3 || this.elementNo === 4) {
               this.startGame();
             } else {
-              this.instructions = `You missed! This time you missed but maybe next time you will get it!`;
+              this.feedback = `You missed! This time you missed but maybe next time you will get it!`;
             }
           };
           
         } else {
-          this.instructions = 'Too soon! You clicked before the element appeared.';          
+          this.feedback = 'Too soon! You clicked before the element appeared.';          
           clearTimeout(this.timer);
         }
         this.buttonText = '⟲ try again';
@@ -105,11 +115,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .feedback {
- height:60px;
  display: flex;
  flex-direction: column;
  justify-content: center;
  align-items: center;
+ padding: 8px;
 }
 button {
   width: 100%;
@@ -126,10 +136,10 @@ button:hover, button:active, button:focus{
   color: #fff;
 }
 .area{
+  background: #DEF2C8;
   width: 100%;
   height: 600px;
   max-height: 100%;
-  background:#dfdfdf;
   padding:15px  8px;
   position: relative;
 }
@@ -140,7 +150,35 @@ button:hover, button:active, button:focus{
 }
 .inactive{
   background-image: url("../assets/stripes.png");
+  background:#dfdfdf;
   /* background-position: center center;
   background-repeat: no-repeat; */
+}
+
+.info{
+  display: inline-block;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 20px;
+  height: 20px;
+  background:#A8E0FF;
+  color: #F7567C;
+  border-radius: 50%;
+  border: 0.5px solid #3E517A;
+}
+.info .instructions {
+  position: absolute;
+  visibility: hidden;
+  width: 220px;
+  background-color: #B08EA2;
+  color: #fff;
+  border-radius: 5px;
+  z-index: 1;
+  padding: 5px;
+  opacity: 0.95;
+}
+.info:hover .instructions {
+  visibility: visible;
 }
 </style>
