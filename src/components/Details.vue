@@ -1,11 +1,11 @@
 <template>
   <div class="hello"> 
-    <div class="feedback">
+    <div class="feedback" ref="response">
       <p v-if="!gameOngoing">{{ instructions }}</p>  
     </div>
     <button v-if="!gameOngoing" @click="startGame">{{ buttonText}}</button>
     <div ref="area" :class="{ area: true, inactive: gameOngoing === false }" @mousedown="endGame">
-      <img ref="elem" src="../assets/elements/apple.png" alt="element">
+      <img ref="elem" :src="require(`../assets/elements/${elementNo}.png`)" alt="element">
     </div>
     
   </div>
@@ -18,6 +18,7 @@ export default {
     return {
       instructions: "Try to click on the appearing elements as fast as possible but watch out for bombs. The faster you are, the higher score you get.",
       buttonText: 'start',
+      elementNo: 1,
       gameOngoing: false,
       delay: 0,
       startTime: 0,
@@ -30,7 +31,8 @@ export default {
       return Math.floor(Math.random() * (max - min) + min);
     },
     startGame() {
-      this.$refs.area.scrollIntoView();
+      this.elementNo = this.getRandomArbitrary(1,8);
+      this.$refs.area.scrollIntoView({behavior: "smooth", block: "center"});
       this.gameOngoing = true;  
       this.startTime = Date.now();
       this.showImage();    
@@ -51,9 +53,12 @@ export default {
     },
     endGame(e) {
       if (this.gameOngoing) {
+        
         this.endTime = Date.now();
         this.gameOngoing = false;
         this.$refs.elem.style.opacity = '0.4';
+        this.$refs.response.scrollIntoView({behavior: "smooth", block: "center"});
+
         const userTime = this.endTime - this.delay - this.startTime;
         if ((this.endTime - this.startTime) > this.delay) {
           if(e.target.tagName === 'IMG') {
@@ -118,7 +123,8 @@ button:hover, button:active, button:focus{
 }
 .area{
   width: 100%;
-  min-height: 600px;
+  height: 600px;
+  max-height: 100%;
   background:#dfdfdf;
   padding:15px  8px;
   position: relative;
