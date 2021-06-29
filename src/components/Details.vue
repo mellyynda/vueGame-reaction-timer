@@ -56,7 +56,6 @@ export default {
       const x = this.getRandomArbitrary(0, (this.$refs.area.clientHeight - 158));
       this.$refs.elem.style.top =  x + 'px';
       this.$refs.elem.style.setProperty('left', y + 'px');
-      console.log(x,y, delay);
       this.timer = setTimeout(() => {   
         this.$refs.elem.style.visibility = 'visible';
       }, delay);
