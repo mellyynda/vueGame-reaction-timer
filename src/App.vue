@@ -1,113 +1,41 @@
 <template>
   <img class="logo" alt="Reaction Timer logo" src="./assets/clock.png">
   <h1>Reaction Timer</h1>
-  <div class="hello"> 
-    <div class="feedback" ref="response">
-      <p v-if="!isPlaying">
-        <span>{{ feedback }}</span>
-        <span v-if="showInstructions">{{ instructions }}</span>
-        <span v-if="!showInstructions" class="info"> ℹ️ 
-          <span class="instructions">Try to click on the appearing element as fast as possible but watch out for bombs. If you see a bomb, click around it as fast as possible and wait for the next element to appear.</span>
-        </span>         
-      </p>  
-    </div>
-    <button ref="btn" v-if="!isPlaying" @click="start">{{ buttonText}}</button>
-    <Block ref="area" :delay="delay" :isPlaying="isPlaying" :endGame="endGame" :elementNo="elementNo" />
+  <div> 
+    <button  @click="start">start</button>
+    <Block v-if="isPlaying" :delay="delay" :isPlaying="isPlaying" :getRandomNo="getRandomNo" @end="endGame" />
+    <Results v-if="showResults" :score="score" />
   </div>
 </template>
 
 <script>
 import Block from './components/Block.vue';
+import Results from './components/Results.vue';
 
 export default {
   name: 'App',
-  components: { Block },
+  components: { Block, Results },
   data() {
     return {
       isPlaying: false,      
-      delay: 0,
-      instructions: "Try to click on the appearing element as fast as possible but watch out for bombs. If you see a bomb, click around it as fast as possible and wait for the next element to appear.",
-      showInstructions: true,
-      feedback: "",
-      buttonText: 'start',
-      elementNo: 1,
-      startTime: 0,
-      endTime: 0,
-      timer: null
+      delay: null,
+      score: null,
+      showResults: false,
     }
   },
   methods: {
-    getRandomArbitrary(min, max) {
+    getRandomNo(min, max) {
       return Math.floor(Math.random() * (max - min) + min);
     },
     start() {
-      this.elementNo = this.getRandomArbitrary(1,8);
-      this.showInstructions = false;
-      this.$refs.area.scrollIntoView({behavior: "smooth", block: "center"});
-      console.log(this.$refs.btn);
+      this.delay = this.getRandomNo(500, 5000);
       this.isPlaying = true;  
-      this.startTime = Date.now();
-      this.showImage();    
+      this.showResults = false
     },
-    showImage() {
-      this.$refs.elem.style.visibility = 'hidden';
-      this.$refs.elem.style.opacity = '1';
-      this.delay = this.getRandomArbitrary(500, 3000);
-      const y = this.getRandomArbitrary(0, (this.$refs.area.clientWidth - 158));
-      const x = this.getRandomArbitrary(0, (this.$refs.area.clientHeight - 158));
-      this.$refs.elem.style.top =  x + 'px';
-      this.$refs.elem.style.setProperty('left', y + 'px');
-      console.log(x,y, this.delay);
-      this.timer = setTimeout(() => {   
-        this.$refs.elem.style.visibility = 'visible';
-      }, this.delay);
-    },
-    endGame(e) {
-      if (this.isPlaying) {
-        
-        this.endTime = Date.now();
-        this.isPlaying = false;
-        this.$refs.elem.style.opacity = '0.4';
-        this.$refs.response.scrollIntoView({behavior: "smooth", block: "center"});
-
-        const userTime = this.endTime - this.delay - this.startTime;
-        if ((this.endTime - this.startTime) > this.delay) {
-          if(e.target.tagName === 'IMG') {
-            if(this.elementNo === 3 || this.elementNo === 4) {
-               this.feedback = `💥💔 You lost! You just clicked on a 💣 within ${userTime} miliseconds`;
-            } else {
-              switch(true) {
-                case (userTime < 301):
-                  this.feedback = `🏆 Congratulations! You were super fast 🌠. You managed to hit the target within ${userTime} miliseconds`;
-                  break;
-                case (userTime < 601):
-                  this.feedback = `🏆 Great job! You were very fast 🏂. You managed to hit the target within ${userTime} miliseconds`;
-                  break;
-                case (userTime < 801):
-                  this.feedback = `Good job! You were not in a hurry 🚶 but still hit the target within ${userTime} miliseconds`;
-                  break;
-                case (userTime < 1001):
-                  this.feedback = `You can do better! Try to 🏃💨 and hit the target faster than ${userTime} miliseconds`;
-                  break;
-                case (userTime >= 1001):
-                  this.feedback = `Oh no! The 🐌 was faster. You only got ${userTime} miliseconds`;
-                  break;
-              } 
-            }                       
-          } else {
-            if(this.elementNo === 3 || this.elementNo === 4) {
-              this.start();
-            } else {
-              this.feedback = `You missed! This time you missed but maybe next time you will get it!`;
-            }
-          };
-          
-        } else {
-          this.feedback = 'Too soon! You clicked before the element appeared.';          
-          clearTimeout(this.timer);
-        }
-        this.buttonText = '⟲ try again';
-      }
+    endGame(reactionTime) {
+      this.score = reactionTime
+      this.isPlaying = false
+      this.showResults = true
     }
   }
 }
